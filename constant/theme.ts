@@ -5,4 +5,7 @@ export const themeColor = {
   neutral: {
     950: "#0a0a0a",
   },
+  gray: {
+    700: "#374151",
+  },
 } as const;
