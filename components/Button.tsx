@@ -8,13 +8,13 @@ export const Button = forwardRef<TouchableOpacity, TouchableOpacityProps>(
         ref={ref}
         {...touchableProps}
         className={`${styles.button} ${touchableProps.className}`}>
-        <Text className={styles.buttonText}>{children}</Text>
+       {children}
       </TouchableOpacity>
     );
   }
 );
 
 const styles = {
-  button: "items-center bg-indigo-500 rounded-[28px] shadow-md p-4",
-  buttonText: "text-white text-lg font-semibold text-center",
+  button: "items-center bg-blue-100 rounded-lg shadow-md p-3",
+  buttonText: "text-white text-lg text-center",
 };
