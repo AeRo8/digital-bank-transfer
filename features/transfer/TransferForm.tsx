@@ -18,6 +18,7 @@ import { Icon } from "~/components/Icon";
 import TextInput from "~/components/TextInput";
 import { contactList } from "~/constant/contact-list";
 import { themeColor } from "~/constant/theme";
+import useBiometricAuth, { BiometricType } from "~/hooks/useBiometricAuth";
 import { isNumber } from "~/utils/general";
 
 type Contact = (typeof contactList)[number];
@@ -40,6 +41,8 @@ const keyExtractor = (contact: Contact) => contact.bankAccountNumber;
 export default function TransferForm() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [selectedRecipient, setSelectedRecipient] = useState<Contact>();
+  const { getSecurityType, handleBiometricAuth } = useBiometricAuth();
+
   const formik = useFormik<TransferFormSchema>({
     initialValues: {
       recipientAccountNumber: "",
@@ -47,8 +50,25 @@ export default function TransferForm() {
       note: "",
     },
     validationSchema: transferSchema,
-    onSubmit: values => {
-      alert(JSON.stringify(values, null, 2));
+    onSubmit: async values => {
+      try {
+        const result = await getSecurityType();
+
+        if (result === BiometricType.None) {
+          alert(JSON.stringify(values, null, 2));
+          return;
+        }
+
+        const isBiometricAuthorized = await handleBiometricAuth();
+
+        if (isBiometricAuthorized) {
+          console.log(`sucess`);
+        } else {
+          console.log(`failed`);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     },
   });
 
