@@ -34,13 +34,18 @@ type TransferFormSchema = {
   note: string;
 };
 
-const transferSchema = Yup.object().shape({
-  recipientAccountNumber: Yup.string().required("Recipient is required"),
-  amount: Yup.string()
-    .test("is-number", "Amount should be number", value => isNumber(value))
-    .required("Amount is required"),
-  note: Yup.string(),
-});
+const transferSchema = (balance: number) => {
+  return Yup.object().shape({
+    recipientAccountNumber: Yup.string().required("Recipient is required"),
+    amount: Yup.string()
+      .test("is-number", "Amount should be number", value => isNumber(value))
+      .test("is-sufficient", "Insufficient funds", value =>
+        typeof value === "undefined" ? false : parseFloat(value) <= balance
+      )
+      .required("Amount is required"),
+    note: Yup.string(),
+  });
+};
 
 const keyExtractor = (contact: Contact) => contact.bankAccountNumber;
 
@@ -57,7 +62,7 @@ export default function TransferForm() {
       amount: "",
       note: "",
     },
-    validationSchema: transferSchema,
+    validationSchema: () => transferSchema(paymentState.balance),
     onSubmit: async values => {
       try {
         const result = await getSecurityType();
