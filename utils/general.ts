@@ -7,3 +7,10 @@ export function isNumber(num: unknown): boolean {
   }
   return false;
 }
+
+export function formatCurrency(balance: number) {
+  return new Intl.NumberFormat("ms-MY", {
+    style: "currency",
+    currency: "MYR",
+  }).format(balance);
+}

@@ -5,6 +5,7 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
+import { router } from "expo-router";
 import { useFormik } from "formik";
 import React, { useCallback, useRef, useState } from "react";
 import { Text, View } from "react-native";
@@ -12,8 +13,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as Yup from "yup";
 
 import TransferBottomSheetSelect from "./TransferBottomSheetSelect";
+import ApiMockPanel from "../api-mock/ApiMockPanel";
 
-import { router } from "expo-router";
 import { Button } from "~/components/Button";
 import { Icon } from "~/components/Icon";
 import TextInput from "~/components/TextInput";
@@ -23,8 +24,8 @@ import { themeColor } from "~/constant/theme";
 import useBiometricAuth, { BiometricType } from "~/hooks/useBiometricAuth";
 import { transferPayment } from "~/lib/apiMock";
 import { useApiMockStateContext } from "~/provider/ApiMockProvider";
-import { isNumber } from "~/utils/general";
-import ApiMockPanel from "../api-mock/ApiMockPanel";
+import { PaymentType, usePaymentContext } from "~/provider/PaymentProvider";
+import { formatCurrency, isNumber } from "~/utils/general";
 
 type Contact = (typeof contactList)[number];
 type TransferFormSchema = {
@@ -48,6 +49,7 @@ export default function TransferForm() {
   const [selectedRecipient, setSelectedRecipient] = useState<Contact>();
   const { getSecurityType, handleBiometricAuth } = useBiometricAuth();
   const { apiMockState } = useApiMockStateContext();
+  const { paymentState, paymentDispatch } = usePaymentContext();
 
   const formik = useFormik<TransferFormSchema>({
     initialValues: {
@@ -74,15 +76,33 @@ export default function TransferForm() {
           });
 
           if (response.success) {
+            const paymentAmount = parseFloat(values.amount);
+
+            paymentDispatch({
+              type: PaymentType.SET_RECIPIENT,
+              payload: {
+                name: selectedRecipient?.name || "",
+                bank: selectedRecipient?.bank || "",
+                bankAccountNumber: values.recipientAccountNumber,
+                paymentAmount,
+                note: values.note,
+              },
+            });
+            paymentDispatch({
+              type: PaymentType.SET_BALANCE,
+              payload: paymentState.balance - paymentAmount,
+            });
+
             router.replace("/(home)/(transfer)/transfer-confirmation");
           } else {
             alert(response.message);
           }
         } else {
-          console.log(`failed`);
+          alert("Biometric cancelled. Please try again.");
         }
       } catch (error) {
         console.error(error);
+        alert("Something went wrong. Please try again.");
       }
     },
   });
@@ -241,10 +261,10 @@ export default function TransferForm() {
 
             <View>
               <Text className="mb-2 text-xl font-bold">
-                Balance: RM{" "}
+                Balance:{" "}
                 <Text
                   style={{ color: themeColor.blue[100], fontWeight: "bold" }}>
-                  16.00
+                  {formatCurrency(paymentState.balance)}
                 </Text>
               </Text>
 

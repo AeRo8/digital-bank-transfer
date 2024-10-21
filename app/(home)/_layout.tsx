@@ -1,5 +1,10 @@
 import { Stack } from "expo-router";
+import { PaymentProvider, usePaymentContext } from "~/provider/PaymentProvider";
 
-const HomeLayout = () => <Stack screenOptions={{ headerShown: false }} />;
+const HomeLayout = () => (
+  <PaymentProvider>
+    <Stack screenOptions={{ headerShown: false }} />
+  </PaymentProvider>
+);
 
 export default HomeLayout;
