@@ -101,6 +101,19 @@ export default function TransferForm() {
           router.replace("/(home)/(transfer)/transfer-confirmation");
         };
 
+        const handlePaymentTransfer = async () => {
+          const response = await transferPayment({
+            success: apiMockState.state === "success",
+            message: mockApiMessage[apiMockState.state],
+          });
+
+          if (response.success) {
+            updatePaymentState();
+          } else {
+            alert(response.message);
+          }
+        };
+
         const result = await getSecurityType();
 
         if (result === BiometricType.None) {
@@ -112,7 +125,7 @@ export default function TransferForm() {
           const isPasswordValid = values.password === PASSWORD;
 
           if (isPasswordValid) {
-            updatePaymentState();
+            await handlePaymentTransfer();
           } else {
             alert("Password is invalid");
           }
@@ -123,16 +136,7 @@ export default function TransferForm() {
         const isBiometricAuthorized = await handleBiometricAuth();
 
         if (isBiometricAuthorized) {
-          const response = await transferPayment({
-            success: apiMockState.state === "success",
-            message: mockApiMessage[apiMockState.state],
-          });
-
-          if (response.success) {
-            updatePaymentState();
-          } else {
-            alert(response.message);
-          }
+          await handlePaymentTransfer();
         } else {
           alert("Biometric cancelled. Please try again.");
         }
