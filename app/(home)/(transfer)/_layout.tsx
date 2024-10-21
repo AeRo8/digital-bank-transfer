@@ -1,8 +1,7 @@
 import { router, Slot } from "expo-router";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { Button } from "~/components/Button";
-import { Container } from "~/components/Container";
 import { Icon } from "~/components/Icon";
 import { themeColor } from "~/constant/theme";
 

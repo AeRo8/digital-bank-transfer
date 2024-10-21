@@ -12,13 +12,14 @@ import { Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as Yup from "yup";
 
-import TransferBottomSheetSelect from "./TransferBottomSheetSelect";
 import ApiMockPanel from "../api-mock/ApiMockPanel";
+import TransferBottomSheetSelect from "./TransferBottomSheetSelect";
 
 import { Button } from "~/components/Button";
 import { Icon } from "~/components/Icon";
 import TextInput from "~/components/TextInput";
 import { mockApiMessage } from "~/constant/apiMock";
+import { PASSWORD } from "~/constant/auth";
 import { contactList } from "~/constant/contact-list";
 import { themeColor } from "~/constant/theme";
 import useBiometricAuth, { BiometricType } from "~/hooks/useBiometricAuth";
@@ -108,7 +109,7 @@ export default function TransferForm() {
             return;
           }
 
-          const isPasswordValid = values.password === "123456";
+          const isPasswordValid = values.password === PASSWORD;
 
           if (isPasswordValid) {
             updatePaymentState();
