@@ -1,8 +1,11 @@
 import "../global.css";
 
+import { activateKeepAwakeAsync } from "expo-keep-awake";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+activateKeepAwakeAsync();
 
 export const unstable_settings = {
   initialRouteName: "(home)",
