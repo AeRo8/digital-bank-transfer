@@ -34,5 +34,8 @@ The decision to use `NativeWind` stems from the ease of transition from `Tailwin
 
 Challenges encountered during development include mastering the `bottom-sheet` and `nativewind` libraries, making components more flexible, exploring `expo-router` for file-based navigation, integrating biometric authentication smoothly, writing clean and maintainable code, and improving the overall user experience.
 
+### Missing Features
+1. Display recent transfer history for quick re-sending
+
 ### Video
 https://github.com/user-attachments/assets/5a636715-b533-47b8-8db6-d24d40407f87
