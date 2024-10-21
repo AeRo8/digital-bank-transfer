@@ -129,6 +129,7 @@ export default function TransferForm() {
           });
 
           if (response.success) {
+            updatePaymentState();
           } else {
             alert(response.message);
           }
