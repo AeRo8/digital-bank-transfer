@@ -19,13 +19,7 @@ export default function ApiMockPanel() {
   };
 
   return (
-    <View
-      style={{
-        padding: 12,
-        marginTop: 12,
-        borderWidth: 2,
-        borderColor: themeColor.neutral[950],
-      }}>
+    <View className="mt-2 border-2 border-neutral-950 p-4">
       <Text className="font-bold">Api Mock Panel</Text>
 
       <Text className="mt-4">State:</Text>
@@ -33,14 +27,12 @@ export default function ApiMockPanel() {
         className="mt-1 flex-row items-center gap-2"
         style={{ flexWrap: "wrap" }}>
         <Button
-          className="shadow-none"
+          className="border-[1px] border-neutral-950 shadow-none"
           style={{
             backgroundColor:
               apiMockState.state === "success"
                 ? themeColor.blue[100]
                 : "transparent",
-            borderColor: themeColor.neutral[950],
-            borderWidth: 1,
           }}
           onPress={() => {
             changeApiMockState("success");
@@ -49,14 +41,12 @@ export default function ApiMockPanel() {
         </Button>
 
         <Button
-          className="shadow-none"
+          className="border-[1px] border-neutral-950 shadow-none"
           style={{
             backgroundColor:
               apiMockState.state === "insufficient funds"
                 ? themeColor.blue[100]
                 : "transparent",
-            borderColor: themeColor.neutral[950],
-            borderWidth: 1,
           }}
           onPress={() => {
             changeApiMockState("insufficient funds");
@@ -65,14 +55,12 @@ export default function ApiMockPanel() {
         </Button>
 
         <Button
-          className="shadow-none"
+          className="border-[1px] border-neutral-950 shadow-none"
           style={{
             backgroundColor:
               apiMockState.state === "network issues"
                 ? themeColor.blue[100]
                 : "transparent",
-            borderColor: themeColor.neutral[950],
-            borderWidth: 1,
           }}
           onPress={() => {
             changeApiMockState("network issues");
