@@ -32,10 +32,11 @@ type TransferFormSchema = {
   recipientAccountNumber: string;
   amount: string;
   note: string;
+  password?: string;
 };
 
-const transferSchema = (balance: number) => {
-  return Yup.object().shape({
+const transferSchema = (balance: number, isValidatePassword?: boolean) => {
+  const defaultSchema = Yup.object().shape({
     recipientAccountNumber: Yup.string().required("Recipient is required"),
     amount: Yup.string()
       .test("is-number", "Amount should be number", value => isNumber(value))
@@ -45,6 +46,16 @@ const transferSchema = (balance: number) => {
       .required("Amount is required"),
     note: Yup.string(),
   });
+
+  if (isValidatePassword) {
+    return defaultSchema.concat(
+      Yup.object().shape({
+        password: Yup.string().required("Password is required"),
+      })
+    );
+  }
+
+  return defaultSchema;
 };
 
 const keyExtractor = (contact: Contact) => contact.bankAccountNumber;
@@ -52,6 +63,7 @@ const keyExtractor = (contact: Contact) => contact.bankAccountNumber;
 export default function TransferForm() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [selectedRecipient, setSelectedRecipient] = useState<Contact>();
+  const [isShowFallback, setIsShowFallback] = useState(false);
   const { getSecurityType, handleBiometricAuth } = useBiometricAuth();
   const { apiMockState } = useApiMockStateContext();
   const { paymentState, paymentDispatch } = usePaymentContext();
@@ -61,14 +73,49 @@ export default function TransferForm() {
       recipientAccountNumber: "",
       amount: "",
       note: "",
+      password: "",
     },
-    validationSchema: () => transferSchema(paymentState.balance),
+    validationSchema: () =>
+      transferSchema(paymentState.balance, isShowFallback),
     onSubmit: async values => {
       try {
+        const updatePaymentState = () => {
+          const paymentAmount = parseFloat(values.amount);
+
+          paymentDispatch({
+            type: PaymentType.SET_RECIPIENT,
+            payload: {
+              name: selectedRecipient?.name || "",
+              bank: selectedRecipient?.bank || "",
+              bankAccountNumber: values.recipientAccountNumber,
+              paymentAmount,
+              note: values.note,
+            },
+          });
+          paymentDispatch({
+            type: PaymentType.SET_BALANCE,
+            payload: paymentState.balance - paymentAmount,
+          });
+
+          router.replace("/(home)/(transfer)/transfer-confirmation");
+        };
+
         const result = await getSecurityType();
 
         if (result === BiometricType.None) {
-          alert(JSON.stringify(values, null, 2));
+          if (!isShowFallback) {
+            setIsShowFallback(true);
+            return;
+          }
+
+          const isPasswordValid = values.password === "123456";
+
+          if (isPasswordValid) {
+            updatePaymentState();
+          } else {
+            alert("Password is invalid");
+          }
+
           return;
         }
 
@@ -81,24 +128,6 @@ export default function TransferForm() {
           });
 
           if (response.success) {
-            const paymentAmount = parseFloat(values.amount);
-
-            paymentDispatch({
-              type: PaymentType.SET_RECIPIENT,
-              payload: {
-                name: selectedRecipient?.name || "",
-                bank: selectedRecipient?.bank || "",
-                bankAccountNumber: values.recipientAccountNumber,
-                paymentAmount,
-                note: values.note,
-              },
-            });
-            paymentDispatch({
-              type: PaymentType.SET_BALANCE,
-              payload: paymentState.balance - paymentAmount,
-            });
-
-            router.replace("/(home)/(transfer)/transfer-confirmation");
           } else {
             alert(response.message);
           }
@@ -303,6 +332,27 @@ export default function TransferForm() {
                 placeholder="Note"
               />
             </View>
+
+            {isShowFallback && (
+              <View>
+                <Text className="text-lg">Enter Password:</Text>
+
+                <TextInput
+                  containerProps={{
+                    className: "border-b-gray-700 border-b-2",
+                  }}
+                  onChangeText={handleChange("password")}
+                  onBlur={handleBlur("password")}
+                  value={`${values.password}`}
+                  errors={errors["password"]}
+                  placeholder="Password"
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoFocus
+                />
+              </View>
+            )}
 
             <Button
               className="mt-4"
