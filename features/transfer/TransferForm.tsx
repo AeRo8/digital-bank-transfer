@@ -5,9 +5,11 @@ import {
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
+import { useFormik } from "formik";
 import React, { useCallback, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import * as Yup from "yup";
 
 import TransferBottomSheetSelect from "./TransferBottomSheetSelect";
 
@@ -16,23 +18,61 @@ import { Icon } from "~/components/Icon";
 import TextInput from "~/components/TextInput";
 import { contactList } from "~/constant/contact-list";
 import { themeColor } from "~/constant/theme";
+import { isNumber } from "~/utils/general";
 
 type Contact = (typeof contactList)[number];
+type TransferFormSchema = {
+  recipientAccountNumber: string;
+  amount: string;
+  note: string;
+};
+
+const transferSchema = Yup.object().shape({
+  recipientAccountNumber: Yup.string().required("Recipient is required"),
+  amount: Yup.string()
+    .test("is-number", "Amount should be number", value => isNumber(value))
+    .required("Amount is required"),
+  note: Yup.string(),
+});
 
 const keyExtractor = (contact: Contact) => contact.bankAccountNumber;
 
 export default function TransferForm() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const [selectedContact, setSelectedContact] = useState<Contact>();
+  const [selectedRecipient, setSelectedRecipient] = useState<Contact>();
+  const formik = useFormik<TransferFormSchema>({
+    initialValues: {
+      recipientAccountNumber: "",
+      amount: "",
+      note: "",
+    },
+    validationSchema: transferSchema,
+    onSubmit: values => {
+      alert(JSON.stringify(values, null, 2));
+    },
+  });
+
+  const { handleChange, handleSubmit, handleBlur, values, errors, touched } =
+    formik;
 
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
 
-  const onSelectBank = (item: Contact) => {
-    setSelectedContact(item);
+  const onSelectBank = useCallback((item: Contact) => {
+    formik.setFieldValue(
+      "recipientAccountNumber",
+      item.bankAccountNumber,
+      false
+    );
+
+    setSelectedRecipient(item);
     bottomSheetModalRef.current?.close();
-  };
+
+    setTimeout(() => {
+      formik.validateField("recipientAccountNumber");
+    });
+  }, []);
 
   const renderItem = useCallback(
     ({ item }: { item: (typeof contactList)[number] }) => {
@@ -89,7 +129,7 @@ export default function TransferForm() {
         }
       }
     },
-    []
+    [onSelectBank]
   );
 
   const itemSeparator = useCallback(() => {
@@ -112,48 +152,92 @@ export default function TransferForm() {
             style={{
               gap: 24,
             }}>
-            <TransferBottomSheetSelect
-              textInputProps={{
-                placeholder: "Recipient",
-                value: selectedContact?.name,
-                style: {
-                  color: themeColor.neutral[950],
-                },
-              }}
-              onPress={handlePresentModalPress}>
-              <TransferBottomSheetSelect.Label>
-                Select recipient
-              </TransferBottomSheetSelect.Label>
-            </TransferBottomSheetSelect>
+            <View>
+              <TransferBottomSheetSelect onPress={handlePresentModalPress}>
+                <TransferBottomSheetSelect.Label>
+                  Select recipient
+                </TransferBottomSheetSelect.Label>
 
-            <View
-              style={{
-                borderBottomColor: themeColor.gray[700],
-                borderBottomWidth: 2,
-                paddingBottom: 4,
-              }}>
+                <TransferBottomSheetSelect.Input
+                  placeholder="Recipient"
+                  value={selectedRecipient?.name}
+                  style={{
+                    color: themeColor.neutral[950],
+                  }}
+                />
+
+                {Boolean(errors["recipientAccountNumber"]) &&
+                  touched.recipientAccountNumber && (
+                    <TransferBottomSheetSelect.Error>
+                      {errors["recipientAccountNumber"]}
+                    </TransferBottomSheetSelect.Error>
+                  )}
+              </TransferBottomSheetSelect>
+
+              {Boolean(selectedRecipient) && (
+                <View className="mt-1">
+                  <Text
+                    className="text-sm"
+                    style={{
+                      fontStyle: "italic",
+                      color: themeColor.gray[700],
+                    }}>
+                    Bank: {selectedRecipient?.bank}
+                  </Text>
+
+                  <Text
+                    className="text-sm"
+                    style={{
+                      fontStyle: "italic",
+                      color: themeColor.gray[700],
+                    }}>
+                    Account Number: {selectedRecipient?.bankAccountNumber}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View>
+              <Text className="mb-2 text-xl font-bold">
+                Balance: RM{" "}
+                <Text
+                  style={{ color: themeColor.blue[100], fontWeight: "bold" }}>
+                  16.00
+                </Text>
+              </Text>
+
               <Text className="text-lg">Enter transfer amount</Text>
 
               <TextInput
+                containerProps={{
+                  className: "border-b-gray-700 border-b-2",
+                }}
                 placeholder="Amount"
                 keyboardType="numeric"
                 autoCorrect={false}
                 autoCapitalize="none"
+                onChangeText={handleChange("amount")}
+                onBlur={handleBlur("amount")}
+                value={`${values.amount}`}
+                errors={errors["amount"]}
               />
             </View>
 
-            <View
-              style={{
-                borderBottomColor: themeColor.gray[700],
-                borderBottomWidth: 2,
-                paddingBottom: 4,
-              }}>
-              <Text className="text-lg">Optional note</Text>
+            <View>
+              <Text className="text-lg">Payment note (optional)</Text>
 
-              <TextInput placeholder="Note" />
+              <TextInput
+                containerProps={{
+                  className: "border-b-gray-700 border-b-2",
+                }}
+                onChangeText={handleChange("note")}
+                onBlur={handleBlur("note")}
+                value={`${values.note}`}
+                placeholder="Note"
+              />
             </View>
 
-            <Button className="mt-4">
+            <Button className="mt-4" onPress={() => handleSubmit()}>
               <Text className="font-bold color-white">Send</Text>
             </Button>
           </View>

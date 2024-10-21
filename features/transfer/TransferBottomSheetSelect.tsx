@@ -12,38 +12,28 @@ import {
 import { Icon } from "~/components/Icon";
 import { themeColor } from "~/constant/theme";
 
-interface TransferBottomSheetSelectProps extends PressableProps {
-  textInputProps: TextInputProps;
-  children: React.ReactNode;
+interface TransferBottomSheetSelectProps extends PressableProps {}
+export default function TransferBottomSheetSelect(
+  props: TransferBottomSheetSelectProps
+) {
+  return <Pressable {...props} />;
 }
-export default function TransferBottomSheetSelect({
-  textInputProps,
-  children,
-  ...props
-}: TransferBottomSheetSelectProps) {
+
+interface TransferBottomSheetSelectInputProps extends TextInputProps {}
+function TransferBottomSheetSelectInput(
+  props: TransferBottomSheetSelectInputProps
+) {
   return (
-    <>
-      <Pressable
-        style={{
-          borderBottomColor: themeColor.gray[700],
-          borderBottomWidth: 2,
-          paddingBottom: 4,
-        }}
-        {...props}>
-        {children}
+    <View className="flex-row items-center justify-between border-b-2 border-b-gray-700">
+      <TextInput
+        className="flex-1"
+        readOnly
+        placeholderTextColor={themeColor.gray[700]}
+        {...props}
+      />
 
-        <View className="flex-row items-center justify-between ">
-          <TextInput
-            className="flex-1"
-            readOnly
-            placeholderTextColor={themeColor.gray[700]}
-            {...textInputProps}
-          />
-
-          <Icon name="chevron-down" size={18} color={themeColor.gray[700]} />
-        </View>
-      </Pressable>
-    </>
+      <Icon name="chevron-down" size={18} color={themeColor.gray[700]} />
+    </View>
   );
 }
 
@@ -54,4 +44,13 @@ function TransferBottomSheetSelectLabel(
   return <Text className="text-lg" {...props} />;
 }
 
+interface TransferBottomSheetSelectErrorProps extends TextProps {}
+function TransferBottomSheetSelectError(
+  props: TransferBottomSheetSelectErrorProps
+) {
+  return <Text className="mt-1 text-sm text-red-500" {...props} />;
+}
+
+TransferBottomSheetSelect.Input = TransferBottomSheetSelectInput;
 TransferBottomSheetSelect.Label = TransferBottomSheetSelectLabel;
+TransferBottomSheetSelect.Error = TransferBottomSheetSelectError;
