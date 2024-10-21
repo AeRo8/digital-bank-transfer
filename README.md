@@ -33,3 +33,6 @@ PASSWORD = "1234456";
 The decision to use `NativeWind` stems from the ease of transition from `Tailwindcss`. Additionally, the `React Context API` is employed for global state management. `Expo` was chosen for its simplicity in development and setup. The UI/UX design draws inspiration from the GxBank mobile app, which offers an intuitive interface.
 
 Challenges encountered during development include mastering the `bottom-sheet` and `nativewind` libraries, making components more flexible, exploring `expo-router` for file-based navigation, integrating biometric authentication smoothly, writing clean and maintainable code, and improving the overall user experience.
+
+### Video
+https://github.com/user-attachments/assets/5a636715-b533-47b8-8db6-d24d40407f87
