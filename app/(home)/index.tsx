@@ -21,7 +21,7 @@ export default function Home() {
         }).format(totalBalance)}
       </Text>
 
-      <Link href="/(home)/(transfer)" asChild>
+      <Link push href="/(home)/(transfer)" asChild>
         <Button className="mt-4">
           <View className="flex-row items-center gap-3">
             <Text className="mb-0 font-bold color-white">Transfer Payment</Text>

@@ -1,14 +1,28 @@
 import { forwardRef } from "react";
-import { Text, TouchableOpacity, TouchableOpacityProps } from "react-native";
+import {
+  ActivityIndicator,
+  TouchableOpacity,
+  TouchableOpacityProps,
+} from "react-native";
 
-export const Button = forwardRef<TouchableOpacity, TouchableOpacityProps>(
-  ({ children, ...touchableProps }, ref) => {
+import { themeColor } from "~/constant/theme";
+
+interface ButtonProps extends TouchableOpacityProps {
+  loading?: boolean;
+}
+export const Button = forwardRef<TouchableOpacity, ButtonProps>(
+  ({ children, loading, ...touchableProps }, ref) => {
     return (
       <TouchableOpacity
         ref={ref}
         {...touchableProps}
+        disabled={loading}
         className={`${styles.button} ${touchableProps.className}`}>
-       {children}
+        {loading ? (
+          <ActivityIndicator color={themeColor.neutral[50]} size="small" />
+        ) : (
+          children
+        )}
       </TouchableOpacity>
     );
   }

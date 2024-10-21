@@ -13,13 +13,18 @@ import * as Yup from "yup";
 
 import TransferBottomSheetSelect from "./TransferBottomSheetSelect";
 
+import { router } from "expo-router";
 import { Button } from "~/components/Button";
 import { Icon } from "~/components/Icon";
 import TextInput from "~/components/TextInput";
+import { mockApiMessage } from "~/constant/apiMock";
 import { contactList } from "~/constant/contact-list";
 import { themeColor } from "~/constant/theme";
 import useBiometricAuth, { BiometricType } from "~/hooks/useBiometricAuth";
+import { transferPayment } from "~/lib/apiMock";
+import { useApiMockStateContext } from "~/provider/ApiMockProvider";
 import { isNumber } from "~/utils/general";
+import ApiMockPanel from "../api-mock/ApiMockPanel";
 
 type Contact = (typeof contactList)[number];
 type TransferFormSchema = {
@@ -42,6 +47,7 @@ export default function TransferForm() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [selectedRecipient, setSelectedRecipient] = useState<Contact>();
   const { getSecurityType, handleBiometricAuth } = useBiometricAuth();
+  const { apiMockState } = useApiMockStateContext();
 
   const formik = useFormik<TransferFormSchema>({
     initialValues: {
@@ -62,7 +68,16 @@ export default function TransferForm() {
         const isBiometricAuthorized = await handleBiometricAuth();
 
         if (isBiometricAuthorized) {
-          console.log(`sucess`);
+          const response = await transferPayment({
+            success: apiMockState.state === "success",
+            message: mockApiMessage[apiMockState.state],
+          });
+
+          if (response.success) {
+            router.replace("/(home)/(transfer)/transfer-confirmation");
+          } else {
+            alert(response.message);
+          }
         } else {
           console.log(`failed`);
         }
@@ -72,8 +87,15 @@ export default function TransferForm() {
     },
   });
 
-  const { handleChange, handleSubmit, handleBlur, values, errors, touched } =
-    formik;
+  const {
+    handleChange,
+    handleSubmit,
+    handleBlur,
+    values,
+    errors,
+    touched,
+    isSubmitting,
+  } = formik;
 
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
@@ -257,9 +279,14 @@ export default function TransferForm() {
               />
             </View>
 
-            <Button className="mt-4" onPress={() => handleSubmit()}>
+            <Button
+              className="mt-4"
+              loading={isSubmitting}
+              onPress={() => handleSubmit()}>
               <Text className="font-bold color-white">Send</Text>
             </Button>
+
+            <ApiMockPanel />
           </View>
 
           <BottomSheetModal
