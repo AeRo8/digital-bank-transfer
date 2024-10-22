@@ -392,6 +392,7 @@ export default function TransferForm() {
                   ItemSeparatorComponent={itemSeparator}
                   keyExtractor={keyExtractor}
                   estimatedItemSize={81.8}
+                  getItemType={item => item.type}
                 />
               </View>
             </BottomSheetView>
