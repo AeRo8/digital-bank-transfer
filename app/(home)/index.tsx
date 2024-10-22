@@ -4,14 +4,15 @@ import { Text, View } from "react-native";
 import { Button } from "~/components/Button";
 import { Container } from "~/components/Container";
 import { Icon } from "~/components/Icon";
-import { PaymentProvider, usePaymentContext } from "~/provider/PaymentProvider";
+import RecentTransactions from "~/features/recent-transactions/RecentTransactions";
+import { usePaymentContext } from "~/provider/PaymentProvider";
 import { formatCurrency } from "~/utils/general";
 
 export default function Home() {
   const { paymentState } = usePaymentContext();
 
   return (
-    <PaymentProvider>
+    <>
       <Container>
         <Text className="">Total balance</Text>
         <Text className="my-2 text-2xl font-bold">
@@ -28,7 +29,9 @@ export default function Home() {
             </View>
           </Button>
         </Link>
+
+        <RecentTransactions />
       </Container>
-    </PaymentProvider>
+    </>
   );
 }

@@ -7,8 +7,10 @@ export interface PaymentState {
     bank: string;
     bankAccountNumber: string;
     paymentAmount: number;
+    status: "success" | "failed";
     note?: string;
   };
+  paymentHistory: NonNullable<this["recipientSuccessInfo"] & { id: string }>[];
 }
 
 export enum PaymentType {
@@ -20,21 +22,30 @@ type PaymentPayload =
   | { type: PaymentType.SET_BALANCE; payload: PaymentState["balance"] }
   | {
       type: PaymentType.SET_RECIPIENT;
-      payload: PaymentState["recipientSuccessInfo"];
+      payload: NonNullable<PaymentState["recipientSuccessInfo"]>;
     };
 
 const INITIAL_STATE: PaymentState = {
   balance: 2_000,
+  paymentHistory: [],
 };
 
 const reducer = (state: PaymentState, action: PaymentPayload): PaymentState => {
   const { type, payload } = action;
 
   switch (type) {
-    case PaymentType.SET_BALANCE:
+    case PaymentType.SET_BALANCE: {
       return { ...state, ...{ balance: payload } };
+    }
     case PaymentType.SET_RECIPIENT: {
-      return { ...state, recipientSuccessInfo: payload };
+      const history = [...state.paymentHistory];
+      history.push({ id: `${Math.random() * 100}`, ...payload });
+
+      return {
+        ...state,
+        recipientSuccessInfo: payload,
+        paymentHistory: history,
+      };
     }
     default:
       return state;

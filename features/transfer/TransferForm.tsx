@@ -80,7 +80,7 @@ export default function TransferForm() {
       transferSchema(paymentState.balance, isShowFallback),
     onSubmit: async values => {
       try {
-        const updatePaymentState = () => {
+        const updatePaymentState = (status: "success" | "failed") => {
           const paymentAmount = parseFloat(values.amount);
 
           paymentDispatch({
@@ -90,15 +90,19 @@ export default function TransferForm() {
               bank: selectedRecipient?.bank || "",
               bankAccountNumber: values.recipientAccountNumber,
               paymentAmount,
+              status,
               note: values.note,
             },
           });
-          paymentDispatch({
-            type: PaymentType.SET_BALANCE,
-            payload: paymentState.balance - paymentAmount,
-          });
 
-          router.replace("/(home)/(transfer)/transfer-confirmation");
+          if (status === "success") {
+            paymentDispatch({
+              type: PaymentType.SET_BALANCE,
+              payload: paymentState.balance - paymentAmount,
+            });
+
+            router.replace("/(home)/(transfer)/transfer-confirmation");
+          }
         };
 
         const handlePaymentTransfer = async () => {
@@ -108,8 +112,9 @@ export default function TransferForm() {
           });
 
           if (response.success) {
-            updatePaymentState();
+            updatePaymentState("success");
           } else {
+            updatePaymentState("failed");
             alert(response.message);
           }
         };
